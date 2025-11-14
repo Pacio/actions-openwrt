@@ -31,20 +31,12 @@ CONFIG_NET_CLS_ACT=y
 # 查找所有与内核 6.6 相关的配置文件并将这些配置项追加到文件末尾
 find ./target/linux/ -name "config-${KERNEL_VERSION}" | xargs -I{} sh -c "echo '$CONFIG_CONTENT' | tee -a {} > /dev/null"
 
-# 交换 LAN/WAN 口 for Friendly R2S
-sed -i 's,"eth1" "eth0","eth0" "eth1",g' target/linux/rockchip/armv8/base-files/etc/board.d/02_network
-sed -i "s,'eth1' 'eth0','eth0' 'eth1',g" target/linux/rockchip/armv8/base-files/etc/board.d/02_network
-
-# 修改主机名ImmortalWrt -> OpenWrt
-sed -i "s,hostname='ImmortalWrt',hostname='OpenWrt',g" package/base-files/files/bin/config_generate
-
 # 修改默认IP
-sed -i 's/192.168.1.1/192.168.10.1/g' package/base-files/files/bin/config_generate
+sed -i 's/eth1/eth3/g' package/base-files/files/etc/board.d/99-default_network
+sed -i 's/192.168.1.1/10.0.0.1/g' package/base-files/files/bin/config_generate
 
-# luci-app-nikki
-echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git;main" >> feeds.conf.default
-
-./scripts/feeds update -a
+# luci-app-podman
+git clone --depth 1 --single-branch https://github.com/breeze303/openwrt-podman package/podman
 ./scripts/feeds install -a
 
 # 使用最新的
